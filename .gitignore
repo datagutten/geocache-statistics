@@ -1,3 +1,5 @@
 config_db.php
 *.txt
 scraper/cache
+web/images
+*test.php
