@@ -11,6 +11,7 @@ class cachetools_insert extends cachetools
 	public $gc;
 	public $GCCode_guid=false;
 	
+	private $st_gccode_to_guid;
 	public $st_insert_log;
 	public $st_update_count;
 	private $options;
@@ -22,7 +23,7 @@ class cachetools_insert extends cachetools
 		
 		$this->st_insert_log=$this->db->prepare("INSERT INTO logs VALUES(:LogID,:CacheID,:CacheGuid,:LogGuid,:Latitude,:Longitude,:LatLonString,:LogType,:LogTypeImage,:LogText,:Created,:Visited,:UserName,:MembershipLevel,:AccountID,:AccountGuid,:Email,:AvatarImage,:GeocacheFindCount,:GeocacheHideCount,:ChallengesCompleted,:IsEncoded,:has_images)");
 		$this->st_update_count=$this->db->prepare("UPDATE geocaches SET NumberOfLogs=? WHERE guid=?");
-		if(!isset($options['guid']))
+		if(isset($options['preload_gccode_to_guid']))
 		{
 			$st_GCCode_guid=$this->GCCode_guid=$this->query("SELECT Guid,GCCode FROM geocaches",false);
 			$this->GCCode_guid=$st_GCCode_guid->fetchAll(PDO::FETCH_KEY_PAIR);
@@ -31,7 +32,14 @@ class cachetools_insert extends cachetools
 	}
 	function cache_gccode_to_guid($GCCode)
 	{
-		return array_search($GCCode,$this->GCCode_guid);
+		$guid=array_search($GCCode,$this->GCCode_guid);
+		if($guid===false)
+		{
+			if(empty($this->st_gccode_to_guid))
+				$this->st_gccode_to_guid=$this->db->prepare('SELECT Guid from geocaches WHERE GCCode=?');
+			$guid=$this->execute($this->st_gccode_to_guid,array($GCCode),'single');
+		}
+		return $guid;
 	}
 	function log_indb($LogID)
 	{
