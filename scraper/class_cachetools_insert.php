@@ -102,7 +102,7 @@ class cachetools_insert extends cachetools
 			}
 		}
 	}
-	function getlogs($guid)
+	function getlogs($guid,$refetch=false)
 	{
 		$starttime=microtime(true);
 		//Prepare query to insert log
@@ -112,26 +112,29 @@ class cachetools_insert extends cachetools
 		$logs=$this->gc->logbook($guid,100,1,$page_info); //Get first page of logs
 
 		$logcount=0;
-
+		if(!$refetch)
+		{
+			$st_logs_indb=$this->db->prepare('SELECT LogID FROM logs WHERE CacheGuid=?');
+			$logs_indb=$this->execute($st_logs_indb,array($guid),'all_column');
+		}
+		else
+		{
+			$st_logs_indb=$this->db->prepare("DELETE FROM logs WHERE CacheGuid=".$this->db->quote($log['LogID']));
+			$this->execute($st_logs_indb,array($guid));
+		}
 		for($page=1; $page<=$page_info['totalPages']; $page++)
 		{
 			if($page>1)
 				$logs=$this->gc->logbook($guid,100,$page); //Fetch more logs
 
-			echo sprintf("Elapsed time: %s page %s\n",round(microtime(true)-$starttime,3),$page);
+			//echo sprintf("Elapsed time: %s page %s\n",round(microtime(true)-$starttime,3),$page);
 
 			foreach($logs as $log)
 			{
-				if($this->log_indb($log['LogID']))
+				if(isset($logs_indb) && array_search($log['LogID'],$logs_indb)!==false)
 				{
-					if(!isset($this->options['refresh']))
-					{
-						echo "Log in DB\n";
-						return $logcount;
-					}
-					else
-						$this->query("DELETE FROM logs WHERE LogId=".$this->db->quote($log['LogID']),false);
-					//continue;
+					//echo "Log {$log['LogID']} is already in DB\n";
+					continue;
 				}
 
 				if(!empty($log['Images']))
