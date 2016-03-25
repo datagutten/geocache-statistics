@@ -3,3 +3,4 @@ config_db.php
 scraper/cache
 web/images
 *test.php
+Logs*.zip
