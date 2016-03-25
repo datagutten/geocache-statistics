@@ -9,7 +9,7 @@ class cachetools_insert extends cachetools
 	private $caches_indb=false;
 	private $logs_indb=false;
 	public $gc;
-	public $GCCode_guid=false;
+	private $GCCode_guid=array();
 	
 	private $st_gccode_to_guid;
 	private $st_insert_log;
