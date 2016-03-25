@@ -12,7 +12,7 @@ class cachetools_insert extends cachetools
 	public $GCCode_guid=false;
 	
 	private $st_gccode_to_guid;
-	public $st_insert_log;
+	private $st_insert_log;
 	public $st_update_count;
 	private $options;
 	
@@ -20,9 +20,6 @@ class cachetools_insert extends cachetools
 	{
 		parent::__construct();
 		$this->gc=new geocaching_com;
-		
-		$this->st_insert_log=$this->db->prepare("INSERT INTO logs VALUES(:LogID,:CacheID,:CacheGuid,:LogGuid,:Latitude,:Longitude,:LatLonString,:LogType,:LogTypeImage,:LogText,:Created,:Visited,:UserName,:MembershipLevel,:AccountID,:AccountGuid,:Email,:AvatarImage,:GeocacheFindCount,:GeocacheHideCount,:ChallengesCompleted,:IsEncoded,:has_images)");
-		$this->st_update_count=$this->db->prepare("UPDATE geocaches SET NumberOfLogs=? WHERE guid=?");
 		if(isset($options['preload_gccode_to_guid']))
 		{
 			$st_GCCode_guid=$this->GCCode_guid=$this->query("SELECT Guid,GCCode FROM geocaches",false);
@@ -108,6 +105,10 @@ class cachetools_insert extends cachetools
 	function getlogs($guid)
 	{
 		$starttime=microtime(true);
+		//Prepare query to insert log
+		if(empty($this->st_insert_log))
+			$this->st_insert_log=$this->db->prepare("INSERT INTO logs VALUES(:LogID,:CacheID,:CacheGuid,:LogGuid,:Latitude,:Longitude,:LatLonString,:LogType,:LogTypeImage,:LogText,:Created,:Visited,:UserName,:MembershipLevel,:AccountID,:AccountGuid,:Email,:AvatarImage,:GeocacheFindCount,:GeocacheHideCount,:ChallengesCompleted,:IsEncoded,:has_images)");
+		$this->st_update_count=$this->db->prepare("UPDATE geocaches SET NumberOfLogs=? WHERE guid=?");
 		$logs=$this->gc->logbook($guid,100,1,$page_info); //Get first page of logs
 
 		$logcount=0;
@@ -118,6 +119,7 @@ class cachetools_insert extends cachetools
 				$logs=$this->gc->logbook($guid,100,$page); //Fetch more logs
 
 			echo sprintf("Elapsed time: %s page %s\n",round(microtime(true)-$starttime,3),$page);
+
 			foreach($logs as $log)
 			{
 				if($this->log_indb($log['LogID']))
@@ -157,15 +159,24 @@ class cachetools_insert extends cachetools
 		$this->cache_finds_count($guid);
 		return $logcount;
 	}
-	function cache_finds_count($guid) //Update caches table with find counts
+
+	//Update caches table with find and log information
+	public function cache_finds_count($guid)
 	{	
-		$table='geocaches';
 		$guid=$this->db->quote($guid);
-		$last_found=$this->query($q="SELECT Visited FROM logs WHERE LogType='Found it' AND CacheGuid=$guid ORDER BY Visited DESC",'single');
-		$last_log=$this->query($q="SELECT Visited FROM logs WHERE CacheGuid=$guid ORDER BY Visited DESC",'single');
+
+		$st_update_count=$this->db->prepare("UPDATE geocaches SET LastFoundDate=?,LastLog=?,NumberOfFinds=?,NumberOfLogs=? WHERE guid=?");
+
+		//Get cache last found date
+		$LastFoundDate=$this->query($q="SELECT Visited FROM logs WHERE LogType='Found it' AND CacheGuid=$guid ORDER BY Visited DESC",'single');
+		//Get cache last log date
+		$LastLogDate=$this->query($q="SELECT Visited FROM logs WHERE CacheGuid=$guid ORDER BY Visited DESC",'single');
+		//Get number of cache finds
 		$NumberOfFinds=$this->query("SELECT count(LogID) FROM logs WHERE CacheGuid=$guid AND LogType='Found it'",'single');
+		//Get total number of logs
 		$NumberOfLogs=$this->query("SELECT count(LogID) FROM logs WHERE CacheGuid=$guid",'single');
-		return $this->query("UPDATE $table SET NumberOfLogs=$NumberOfLogs,LastLog='$last_log',LastFoundDate='$last_found',NumberOfFinds='$NumberOfFinds' WHERE Guid=$guid");
+
+		return $st_update_count->execute(array($LastFoundDate,$LastLogDate,$NumberOfFinds,$NumberOfLogs,$guid));
 	}
 }
 
