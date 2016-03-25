@@ -33,21 +33,26 @@ class cachetools
 		elseif($fetch=='all')
 			return $st->fetchAll(PDO::FETCH_ASSOC);
 		elseif($fetch=='all_column')
-			return $st->fetchAll(PDO::FETCH_COLUMN);		
+			return $st->fetchAll(PDO::FETCH_COLUMN);
+		else
+			throw new Exception('Invalid fetch');
 	}
 	function execute($st,$parameters,$fetch=false)
 	{
 		if($st->execute($parameters)===false)
 		{
 			$errorinfo=$st->errorInfo();
-			trigger_error("SQL error: {$errorinfo[2]}",E_USER_WARNING);
-			//throw new Exception("SQL error: {$errorinfo[2]}");
+			throw new Exception("SQL error: {$errorinfo[2]}");
 			return false;
 		}
 		elseif($fetch=='single')
 			return $st->fetch(PDO::FETCH_COLUMN);
 		elseif($fetch=='all')
 			return $st->fetchAll(PDO::FETCH_ASSOC);
+		elseif($fetch=='all_column')
+			return $st->fetchAll(PDO::FETCH_COLUMN);
+		else
+			throw new Exception('Invalid fetch');
 	}
 	public function set_locale($locale,$domain)
 	{
