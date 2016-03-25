@@ -16,12 +16,11 @@ class geocaching_com
 		$this->ch=curl_init();
 		curl_setopt($this->ch,CURLOPT_RETURNTRANSFER,true);
 		curl_setopt($this->ch,CURLOPT_FOLLOWLOCATION,true);
-		
+		curl_setopt($this->ch,CURLOPT_USERAGENT,'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36');
 		curl_setopt($this->ch,CURLOPT_COOKIEFILE,'cookies_geocaching_com.txt'); //Read cookies
 		$this->filecache=new filecache; //Class used to cache data from geocaching.com
 		//$this->set_locale('nb_NO.utf8','scraper');
 		//echo _("You are using geocaching.com in English")."\n";
-		
 	}
 	function get($url)
 	{
@@ -98,13 +97,17 @@ class geocaching_com
 		$data=curl_exec($this->ch); //The URL from the GET request is also used for POST
 		curl_setopt($this->ch,CURLOPT_HTTPGET,true); //Set the method back to get
 
-
 		return $this->is_logged_in($data);
 	}
 	function is_logged_in($data)
 	{
 		if(preg_match("#class=\"li-user-info\"[^>]*>.*?<span>(.*?)</span>#s",$data,$username)) //Pattern from C:Geo
 			return $username[1];
+		if(strpos($data,'If you are human we apologize for the brief intermission. Please follow instruction.')!==false)
+		{
+			echo "Captcha required, use cookies from browser";
+			return false;
+		}
 		if(strpos($data,"Join now to view geocache location details. It's free!")===false || strpos($data,'data-event-label="Sign In"')===false)
 			return false;
 		else
