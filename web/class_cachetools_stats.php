@@ -1,5 +1,5 @@
 <?php
-require 'class_cachetools.php';
+require '../class_cachetools.php';
 class cachetools_stats extends cachetools
 {
 	public $st_attributes;
