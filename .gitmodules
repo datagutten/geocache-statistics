@@ -1,0 +1,6 @@
+[submodule "tools"]
+	path = tools
+	url = git@github.com:datagutten/tools.git
+[submodule "queuemanager"]
+	path = queuemanager
+	url = git@github.com:datagutten/queuemanager.git
