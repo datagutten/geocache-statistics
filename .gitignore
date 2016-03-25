@@ -2,5 +2,6 @@ config_db.php
 *.txt
 scraper/cache
 web/images
+web/data
 *test.php
 Logs*.zip
