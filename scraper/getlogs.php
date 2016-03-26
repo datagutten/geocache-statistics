@@ -20,6 +20,6 @@ if(!isset($guid) && isset($gccode))
 	}
 }
 
-echo "Fetching logs for $gccode\n";
+echo "Fetching logs for $guid\n";
 $logcount=$cachetools->getlogs($guid);
 echo $logcount." logs inserted\n";
