@@ -107,7 +107,7 @@ class cachetools_insert extends cachetools
 		$starttime=microtime(true);
 		//Prepare query to insert log
 		if(empty($this->st_insert_log))
-			$this->st_insert_log=$this->db->prepare("INSERT INTO logs VALUES(:LogID,:CacheID,:CacheGuid,:LogGuid,:Latitude,:Longitude,:LatLonString,:LogType,:LogTypeImage,:LogText,:Created,:Visited,:UserName,:MembershipLevel,:AccountID,:AccountGuid,:Email,:AvatarImage,:GeocacheFindCount,:GeocacheHideCount,:ChallengesCompleted,:IsEncoded,:has_images)");
+			$this->st_insert_log=$this->db->prepare("INSERT INTO logs 	VALUES(:LogID,:CacheID,:CacheGuid,:LogGuid,:Latitude,:Longitude,:LatLonString,:LogType,:LogTypeImage,:LogText,:Created,:Visited,:VisitedTimestamp,:UserName,:MembershipLevel,:AccountID,:AccountGuid,:Email,:AvatarImage,:GeocacheFindCount,:GeocacheHideCount,:ChallengesCompleted,:IsEncoded,:has_images)");
 		$this->st_update_count=$this->db->prepare("UPDATE geocaches SET NumberOfLogs=? WHERE guid=?");
 		$logs=$this->gc->logbook($guid,100,1,$page_info); //Get first page of logs
 
@@ -143,6 +143,7 @@ class cachetools_insert extends cachetools
 					$log['has_images']=0;
 				unset($log['creator'],$log['Images']);
 				$log['CacheGuid']=$guid;
+				$log['VisitedTimestamp']=strtotime($log['Visited']);
 				//print_r($log);
 				foreach($log as $key=>$value)
 				{
