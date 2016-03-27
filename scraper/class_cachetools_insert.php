@@ -67,7 +67,7 @@ class cachetools_insert extends cachetools
 		}
 		if(empty($cache))
 			continue;
-
+		$cache['LastUpdated']=time();
 		$fields=implode('`,`',array_keys($cache));
 
 		$q="INSERT INTO geocaches (`$fields`) VALUES(";
@@ -160,27 +160,26 @@ class cachetools_insert extends cachetools
 				$logcount++;
 			}
 		}
-		$this->cache_finds_count($guid);
 		return $logcount;
 	}
 
 	//Update caches table with find and log information
 	public function cache_finds_count($guid)
 	{	
-		$guid=$this->db->quote($guid);
+		$guid_quoted=$this->db->quote($guid);
 
 		$st_update_count=$this->db->prepare("UPDATE geocaches SET LastFoundDate=?,LastLog=?,NumberOfFinds=?,NumberOfLogs=? WHERE guid=?");
 
 		//Get cache last found date
-		$LastFoundDate=$this->query($q="SELECT Visited FROM logs WHERE LogType='Found it' AND CacheGuid=$guid ORDER BY Visited DESC",'single');
+		$LastFoundDate=$this->query($q="SELECT Visited FROM logs WHERE LogType='Found it' AND CacheGuid=$guid_quoted ORDER BY Visited DESC",'single');
 		//Get cache last log date
-		$LastLogDate=$this->query($q="SELECT Visited FROM logs WHERE CacheGuid=$guid ORDER BY Visited DESC",'single');
+		$LastLogDate=$this->query($q="SELECT Visited FROM logs WHERE CacheGuid=$guid_quoted ORDER BY Visited DESC",'single');
 		//Get number of cache finds
-		$NumberOfFinds=$this->query("SELECT count(LogID) FROM logs WHERE CacheGuid=$guid AND LogType='Found it'",'single');
+		$NumberOfFinds=$this->query("SELECT count(LogID) FROM logs WHERE CacheGuid=$guid_quoted AND LogType='Found it'",'single');
 		//Get total number of logs
-		$NumberOfLogs=$this->query("SELECT count(LogID) FROM logs WHERE CacheGuid=$guid",'single');
+		$NumberOfLogs=$this->query("SELECT count(LogID) FROM logs WHERE CacheGuid=$guid_quoted",'single');
 
-		return $st_update_count->execute(array($LastFoundDate,$LastLogDate,$NumberOfFinds,$NumberOfLogs,$guid));
+		return $this->execute($st_update_count,$fields=array($LastFoundDate,$LastLogDate,$NumberOfFinds,$NumberOfLogs,$guid));
 	}
 }
 
