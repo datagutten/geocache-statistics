@@ -5,3 +5,4 @@ web/images
 web/data
 *test.php
 Logs*.zip
+gsak_importer/sqlite.db3
