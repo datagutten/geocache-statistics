@@ -1,10 +1,3 @@
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>CSV logbook</title>
-</head>
-
 <?Php
 require 'class_cachetools_stats.php';
 $cachetools=new cachetools_stats;
@@ -13,12 +6,20 @@ $web=new cachetools_web;
 require_once '../tools/DOMDocument_createElement_simple.php';
 $dom=new DOMDocumentCustom;
 $dom->formatOutput=true;
+?>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title><?Php echo _('CSV logbook'); ?></title>
+</head>
 
+<?Php
 $body=$dom->createElement('body');
 $form=$dom->createElement_simple('form',$body,array('method'=>'post'));
-$p=$dom->createElement_simple('p',$form,false,_('Owner name: '));
+$p=$dom->createElement_simple('p',$form,false,_('Owner name').': ');
 $dom->createElement_simple('input',$p,array('type'=>'text','name'=>'owner'));
-$p=$dom->createElement_simple('p',$form,false,_('GC code: '));
+$p=$dom->createElement_simple('p',$form,false,_('GC code').': ');
 $dom->createElement_simple('input',$p,array('type'=>'text','name'=>'gccode'));
 
 $dom->createElement_simple('input',$form,array('type'=>'submit','name'=>'submit','value'=>_('Create CSV')));
