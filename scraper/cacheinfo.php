@@ -33,8 +33,11 @@ elseif(isset($options['guid']))
 if(isset($options['show_gccodes']))
 	die(implode("\n",$gccodes));
 
-
+//----Memory issue-----
+//echo sprintf("%s MB RAM used in %s at line %s\n",round(memory_get_usage()/1024/1024,2),__FILE__,__LINE__);
 $gccodes_indb=$cachetools->query("SELECT gccode FROM geocaches",'all_column');
+//var_dump(count($gccodes_indb));
+//echo sprintf("%s MB RAM used in %s at line %s\n",round(memory_get_usage()/1024/1024,2),__FILE__,__LINE__);
 if(isset($options['logqueue']) || isset($options['cachequeue']) || isset($options['cache_gccodes']) || isset($options['write_gccodes']))
 {
 	if(isset($options['refresh']))
@@ -93,12 +96,7 @@ foreach($gccodes as $key=>$GCcode)
 
 		$time=time();
 		if(!isset($options['guid']))
-		{
-			$guid=array_search($GCcode,$cachetools->GCCode_guid);
-			/*echo "Find guid: ";
-			echo time()-$time;
-			echo "\n";*/
-		}
+			$guid=$cachetools->cache_gccode_to_guid($GCcode);
 		else
 			$guid=$options['guid'];
 		if(empty($guid))
@@ -107,8 +105,7 @@ foreach($gccodes as $key=>$GCcode)
 		{
 			if(isset($options['logqueue']))
 			{
-				$cmd="php cacheinfo.php --guid $guid --getlogs --nocache";
-			
+				$cmd="php getlogs.php $guid";
 				$description=sprintf('Get logs for %s %s',$GCcode,$action_text);
 				//$cachetools->query("INSERT INTO queue (command,folder,description) VALUES ('$cmd','scraper','$description')");
 				$queue->add_job($cmd,$description);
@@ -124,3 +121,4 @@ foreach($gccodes as $key=>$GCcode)
 		}
 	}
 }
+//echo sprintf("%s MB RAM used in %s at line %s\n",round(memory_get_usage()/1024/1024,2),__FILE__,__LINE__);
