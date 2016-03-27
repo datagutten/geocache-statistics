@@ -49,8 +49,8 @@ if(isset($_POST['submit']))
 	if(isset($_POST['refresh']))
 		$cmd.=' --refresh';
 	$job_id=$queue->add_job($cmd,'Added from getlogs_gui.php');
-	var_dump($job_id);
-	echo "<p>$cmd</p>";
+	//var_dump($job_id);
+	//echo "<p>$cmd</p>";
 }
 echo $dom->saveXML($body);
 ?>
