@@ -108,30 +108,6 @@ class cachetools_stats extends cachetools
 		}
 		return $attribute_count;
 	}
-	function dt($user,$mode='owned')
-	{
-		$user_db=$this->db->quote($user);
-		$baseq='SELECT %1$s,count(%1$s) FROM geocaches%2$s WHERE %3$s GROUP BY %1$s';
-		if($mode=='found')
-		{
-			$baseq="SELECT Difficulty,Terrain,count(*) as count FROM geocaches,logs WHERE geocaches.Guid=logs.CacheGuid AND (LogType='Found it' OR LogType='Attended') AND logs.UserName=%s GROUP BY Difficulty,Terrain";
-			return $this->query(sprintf($baseq,$user_db),'all');
-		}
-		elseif($mode=='owned')
-		{
-			$baseq="SELECT Difficulty,Terrain,count(*) as count FROM geocaches WHERE OwnerName=%s GROUP BY Difficulty,Terrain";
-			$q_owner=sprintf($baseq,'Difficulty','','OwnerName=?');
-		}
-		//$q_found=sprintf($baseq,'Difficulty',',logs','logs.UserName=? AND logs.CacheId=geocaches.CacheID');
-		$baseq_found=sprintf($this->query_found_logs,'%1$s,count(%1$s)').' AND logs.UserName=? GROUP BY %1$s';
-		echo $baseq_found."<br />\n";
-		echo sprintf($baseq_found,'Difficulty');
-		//echo $q_found;
-	}
-	function difficulty_sum()
-	{
-		$q="SELECT Difficulty,count(*) as count FROM geocaches WHERE OwnerName='datagutten' GROUP BY Difficulty";
-	}
 	function total_days($cache_finds_date)
 	{
 		$first=array_shift($cache_finds_date);
