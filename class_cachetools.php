@@ -51,7 +51,9 @@ class cachetools
 			return $st->fetchAll(PDO::FETCH_ASSOC);
 		elseif($fetch=='all_column')
 			return $st->fetchAll(PDO::FETCH_COLUMN);
-		elseif($fetch!==false)
+		elseif($fetch===false)
+			return $st;
+		else
 			throw new Exception('Invalid fetch');
 	}
 	public function set_locale($locale,$domain)
