@@ -1,4 +1,5 @@
 <?Php
+require_once '../tools/DOMDocument_createElement_simple.php';
 class cachetools_web
 {
 	public $dom;
@@ -8,7 +9,6 @@ class cachetools_web
 	{
 		error_reporting(E_ALL);
 		ini_set('display_errors',true);
-		require_once '../tools/DOMDocument_createElement_simple.php';
 		$this->dom=new DOMDocumentCustom;
 		$this->dom->formatOutput=true;
 		$this->labels=array('LogText'=>_('Log')
